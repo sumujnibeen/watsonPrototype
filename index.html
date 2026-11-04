@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watson – ভয়েস অ্যাসিস্ট্যান্ট প্রোটোটাইপ</title>
+<style>
+:root{
+  --red:#ED1C24; --white:#fff; --ink:#111; --gray:#e0e0e0; --prompt:#8a8a8a;
+  --ease:cubic-bezier(.65,0,.25,1);
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans Bengali",sans-serif;background:#cfd9e6;overflow:hidden}
+.desktop{position:relative;height:100%;
+  background:
+   radial-gradient(60% 55% at 52% 62%,#1f6fff 0,#0b49d6 45%,transparent 70%),
+   radial-gradient(40% 40% at 70% 78%,#2a7cff 0,transparent 70%),
+   radial-gradient(35% 35% at 36% 70%,#0a3fc0 0,transparent 70%),
+   linear-gradient(160deg,#d9e3ef,#b9c9dc);
+}
+.icons{position:absolute;top:16px;left:16px;display:grid;gap:18px;color:#222;font-size:11px;text-align:center}
+.icons div{width:56px}.icons i{display:block;width:30px;height:26px;border-radius:5px;background:#5aa0ff;margin:0 auto 4px}
+
+/* panel for demo controls */
+.panel{position:absolute;top:16px;right:16px;width:250px;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);border-radius:14px;padding:14px;font-size:13px;color:#222;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+.panel b{display:block;margin-bottom:8px;font-size:14px}
+.panel button{display:block;width:100%;margin-top:6px;padding:9px 10px;border:0;border-radius:9px;background:#111;color:#fff;font:inherit;cursor:pointer;text-align:left}
+.panel button.r{background:var(--red)}
+.panel button:focus-visible{outline:3px solid #1f6fff;outline-offset:2px}
+.panel p{margin-top:8px;font-size:11.5px;color:#555;line-height:1.5}
+
+.scenes{position:absolute;top:16px;left:50%;transform:translateX(-50%);text-align:center;z-index:5}
+.seg{display:inline-flex;padding:4px;border-radius:999px;background:rgba(255,255,255,.88);backdrop-filter:blur(14px);box-shadow:0 8px 30px rgba(0,0,0,.18)}
+.seg button{border:0;background:none;font:inherit;font-size:14px;padding:8px 22px;border-radius:999px;cursor:pointer;color:#222;transition:background .3s,color .3s}
+.seg button[aria-pressed="true"]{background:#111;color:#fff}
+.seg button:focus-visible{outline:3px solid #1f6fff;outline-offset:2px}
+.scenes p{margin-top:8px;font-size:12px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.45)}
+.desktop{cursor:pointer}
+/* assistant popup */
+.dock{position:absolute;right:20px;bottom:64px;display:flex;align-items:center;gap:12px;flex-direction:row}
+.orb{position:relative;width:64px;height:64px;border-radius:50%;overflow:hidden;background:var(--gray);flex:none;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer}
+.orb .sweep{position:absolute;inset:0;transform:translateX(-101%)}
+.orb svg{position:absolute;inset:0;width:100%;height:100%}
+.orb svg rect{fill:#000;transition:fill .55s var(--ease)}
+.orb.active svg rect{animation:bar 0.9s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.orb.active svg rect:nth-child(1){animation-delay:.0s}
+.orb.active svg rect:nth-child(2){animation-delay:.18s}
+.orb.active svg rect:nth-child(3){animation-delay:.36s}
+@keyframes bar{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.55)}}
+
+.bubble{max-width:340px;min-height:44px;padding:12px 20px;border-radius:14px;font-size:15px;line-height:1.35;
+  background:var(--white);color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.2);
+  opacity:0;transform:translateX(16px) scale(.97);pointer-events:none;
+  transition:opacity .35s var(--ease),transform .35s var(--ease),background .4s,color .4s}
+.bubble.show{opacity:1;transform:none}
+.bubble.prompt{opacity:.62;color:#6b6b6b;background:#f1f1f1}
+.bubble.show.prompt{opacity:.7}
+.bubble.fail{background:var(--red);color:#fff}
+
+/* taskbar */
+.taskbar{position:absolute;left:0;right:0;bottom:0;height:48px;background:rgba(243,243,243,.85);backdrop-filter:blur(20px);border-top:1px solid rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center}
+.tasks{display:flex;gap:6px;align-items:center}
+.tasks span{width:36px;height:36px;display:grid;place-items:center;border-radius:7px}
+.tasks span:hover{background:rgba(0,0,0,.06)}
+.tasks svg{width:22px;height:22px}
+.tray{position:absolute;right:14px;display:flex;align-items:center;gap:14px;font-size:12px;color:#222;text-align:right;line-height:1.2}
+.tray svg{width:17px;height:17px}
+.tasks span.run{position:relative;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.06)}
+.tasks span.run::after{content:"";position:absolute;bottom:2px;left:50%;width:16px;height:3px;margin-left:-8px;border-radius:3px;background:#ED1C24}
+.app{cursor:pointer;border:0;background:none}
+.app:focus-visible{outline:3px solid #1f6fff;border-radius:8px}
+@media (max-width:720px){.panel{top:auto;bottom:66px;left:12px;right:auto;width:200px}.dock{right:10px;bottom:240px}.taskbar{justify-content:flex-start;padding-left:10px}.tasks span{width:34px}.tray svg{display:none}}
+@media (prefers-reduced-motion:reduce){.orb.active svg rect{animation:none}}
+</style>
+</head>
+<body>
+<div class="desktop">
+  <div class="icons"><div><i></i>Books</div><div><i style="background:#3bd"></i>Edge</div></div>
+
+  <div class="scenes" role="group" aria-label="সিনারিও">
+    <div class="seg">
+      <button id="sFound" aria-pressed="true">Found</button>
+      <button id="sNot" aria-pressed="false">Not Found</button>
+    </div>
+  </div>
+
+  <div class="dock">
+    <div class="bubble" id="bubble"></div>
+    <div class="orb" id="orb" title="Watson">
+      <div class="sweep" id="sweep"></div>
+      <svg viewBox="0 0 100 100"><rect x="22" y="31" width="11.5" height="38" rx="3"/><rect x="43.2" y="21" width="13.6" height="58" rx="3.5"/><rect x="66.5" y="31" width="11.5" height="38" rx="3"/></svg>
+    </div>
+  </div>
+
+  <div class="taskbar">
+    <div class="tasks">
+      <span><svg viewBox="0 0 24 24"><path fill="#0a5bd8" d="M2 3.5l9-1.2v9H2zM12 2.1l10-1.4v10.6H12zM2 12.5h9v9L2 20.3zM12 12.5h10v10.800L12 21.900z"/></svg></span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg></span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="11" r="2.5"/></svg></span>
+      <span><svg viewBox="0 0 24 24"><rect width="22" height="16" x="1" y="4" rx="3" fill="#2d8cff"/><text x="12" y="15.500" font-size="8" font-weight="700" fill="#fff" text-anchor="middle" font-family="sans-serif">ZM</text></svg></span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="1.8"><circle cx="12" cy="12" r="9.500"/><ellipse cx="12" cy="12" rx="4" ry="9.500"/><path d="M2.500 12h19M4 7.500h16M4 16.500h16"/></svg></span>
+            <span class="run"><button class="app" id="appbtn" aria-label="Watson"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#ED1C24"/><circle cx="50" cy="50" r="20" fill="#fff"/></svg></button></span>
+    </div>
+    <div class="tray">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M2 9a15 15 0 0120 0M5 12.500a10 10 0 0114 0M8.500 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="#222"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M3 9h4l5-4v14l-5-4H3zM16 8a5 5 0 010 8"/></svg>
+      <div><div id="clock">9:54 AM</div><div id="date">11/4/2026</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const orb=document.getElementById('orb'), sweep=document.getElementById('sweep'), bubble=document.getElementById('bubble');
+const bars=[...orb.querySelectorAll('rect')];
+const RED='#ED1C24', WHITE='#ffffff', GRAY='#e0e0e0', BLACK='#000000';
+let bg=GRAY, hideT=null, runId=0, busy=false;
+
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+orb.style.background=bg;
+
+/* সাইড থেকে রঙ এসে পুরো বৃত্ত ঢেকে দেয় (Nothing recorder-এর মতো) */
+function sweepTo(newBg,barColor,fromLeft=true){
+  return new Promise(res=>{
+    sweep.style.transition='none';
+    sweep.style.background=newBg;
+    sweep.style.transform=`translateX(${fromLeft?-101:101}%)`;
+    void sweep.offsetWidth;
+    bars.forEach(b=>b.style.fill=barColor);
+    sweep.style.transition='transform .6s var(--ease)';
+    sweep.style.transform='translateX(0)';
+    setTimeout(()=>{orb.style.background=newBg;bg=newBg;sweep.style.transition='none';sweep.style.transform='translateX(-101%)';res();},620);
+  });
+}
+
+function say(text,mode=''){ // mode: '' | 'prompt' | 'fail'
+  clearTimeout(hideT);
+  bubble.className='bubble show '+mode;
+  bubble.textContent=text;
+  hideT=setTimeout(hide,10000); // সর্বোচ্চ ১০ সেকেন্ড
+}
+function hide(){bubble.classList.remove('show')}
+
+async function toIdle(){
+  clearTimeout(hideT); hide();
+  orb.classList.remove('active');
+  await sweepTo(GRAY,BLACK,false);
+}
+
+async function wake(){
+  if(busy) return; busy=true; const id=++runId;
+  hide(); await wait(120);
+  orb.classList.add('active');
+  say('Speak sherlock','prompt');
+  await sweepTo(RED,WHITE,true);
+  return id;
+}
+
+async function runCommand(heard,result,ok){
+  const id=await wake(); if(id!==runId){return}
+  await wait(3200);
+  // কমান্ড শোনার পর: সাদা ব্যাকগ্রাউন্ড, লাল বার
+  say('You said: '+heard);
+  await sweepTo(WHITE,RED,true);
+  await wait(2400);
+  // ফলাফল
+  say(result, ok?'':'fail');
+  await wait(3200);
+  busy=false;
+  await toIdle();
+}
+
+async function wakeOnly(){
+  const id=await wake(); if(id!==runId) return;
+  await wait(6000);
+  busy=false; hide(); await toIdle();
+}
+
+let scene='found';
+const sF=document.getElementById('sFound'), sN=document.getElementById('sNot');
+function pick(v){scene=v;sF.setAttribute('aria-pressed',v==='found');sN.setAttribute('aria-pressed',v==='not');}
+sF.onclick=()=>pick('found'); sN.onclick=()=>pick('not');
+// স্ক্রিনের যেকোনো জায়গায় ক্লিক করলে সিলেক্ট করা সিনারিও চলবে
+document.addEventListener('click',e=>{
+  if(e.target.closest('.scenes')||busy) return;
+  if(scene==='found') runCommand('Open books folder','Book folder opened',true);
+  else runCommand('Open books folder','Folder not found',false);
+});
+
+function tick(){const d=new Date();document.getElementById('clock').textContent=d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});document.getElementById('date').textContent=d.toLocaleDateString('en-US');}
+tick();setInterval(tick,15000);
+</script>
+</body>
+</html>
