@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Watson – ভয়েস অ্যাসিস্ট্যান্ট প্রোটোটাইপ</title>
+<title>Watson – Voice Assistant (Prototype)</title>
 <style>
 :root{
   --red:#ED1C24; --white:#fff; --ink:#111; --gray:#e0e0e0; --prompt:#8a8a8a;
@@ -36,8 +36,35 @@ html,body{height:100%;font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans 
 .seg button:focus-visible{outline:3px solid #1f6fff;outline-offset:2px}
 .scenes p{margin-top:8px;font-size:12px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.45)}
 .desktop{cursor:pointer}
+
+/* File Explorer window */
+.win{position:absolute;top:88px;left:50%;width:min(660px,94vw);height:330px;margin-left:calc(min(660px,94vw)/-2);background:#fbfbfb;border-radius:10px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.12);display:flex;flex-direction:column;z-index:3;color:#1b1b1b;font-size:12.5px;
+  opacity:0;transform:translateY(40px) scale(.9);transform-origin:50% 100%;pointer-events:none;transition:opacity .28s var(--ease),transform .32s var(--ease)}
+.win.open{opacity:1;transform:none;pointer-events:auto}
+.wt{display:flex;justify-content:space-between;align-items:stretch;height:36px;background:#e9eef5;padding-left:10px}
+.wtab{align-self:flex-end;display:flex;gap:7px;align-items:center;background:#fbfbfb;padding:0 14px;height:30px;border-radius:8px 8px 0 0}
+.fo{width:16px;height:13px;border-radius:2px;background:#f6c343;display:inline-block}
+.wc{display:flex}.wc b{width:42px;display:grid;place-items:center;font-weight:400;font-size:13px;cursor:default}
+.wc b:hover{background:rgba(0,0,0,.07)}.wc b#wclose:hover{background:#c42b1c;color:#fff}
+.wbar{display:flex;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid #e6e6e6}
+.nav{color:#777;letter-spacing:6px;white-space:nowrap}
+.addr{flex:1;border:1px solid #ddd;border-radius:6px;padding:5px 10px;background:#fff;white-space:nowrap;overflow:hidden}
+.srch{width:130px;border:1px solid #ddd;border-radius:6px;padding:5px 10px;color:#888;background:#fff}
+.wb{flex:1;display:flex;min-height:0}
+.side{width:140px;padding:8px 6px;border-right:1px solid #eee;display:grid;gap:2px;align-content:start}
+.side div{padding:6px 10px;border-radius:5px}.side .sel{background:#dfeaf8}
+.list{flex:1;padding:6px 8px;overflow:hidden}
+.row{display:grid;grid-template-columns:1fr 120px 70px 70px;gap:8px;align-items:center;padding:6px 8px;border-radius:5px;white-space:nowrap}
+.row:not(.hd):hover{background:#eef4fc}.hd{color:#777;border-bottom:1px solid #eee;border-radius:0;margin-bottom:2px}
+.nm{display:flex;align-items:center;gap:9px;overflow:hidden;text-overflow:ellipsis}
+.fi{flex:none;width:18px;height:20px;border-radius:3px;color:#fff;font-size:7px;font-weight:700;display:grid;place-items:center}
+.row span:nth-child(n+2){color:#666}
+.wf{padding:5px 12px;color:#666;border-top:1px solid #eee;font-size:12px}
+.tasks span.ex{display:none;position:relative}.tasks span.ex.on{display:grid}
+.tasks span.ex::after{content:"";position:absolute;bottom:3px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:#8a8a8a}
+@media (max-width:720px){.side{display:none}.row{grid-template-columns:1fr 60px}.row span:nth-child(2),.row span:nth-child(3){display:none}.srch{display:none}}
 /* assistant popup */
-.dock{position:absolute;right:20px;bottom:64px;display:flex;align-items:center;gap:12px;flex-direction:row}
+.dock{z-index:4;position:absolute;right:20px;bottom:64px;display:flex;align-items:center;gap:12px;flex-direction:row}
 .orb{position:relative;width:64px;height:64px;border-radius:50%;overflow:hidden;background:var(--gray);flex:none;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer}
 .orb .sweep{position:absolute;inset:0;transform:translateX(-101%)}
 .orb svg{position:absolute;inset:0;width:100%;height:100%}
@@ -84,6 +111,16 @@ html,body{height:100%;font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans 
     </div>
   </div>
 
+  <div class="win" id="win" aria-hidden="true">
+    <div class="wt"><div class="wtab"><i class="fo"></i>Books</div><div class="wc"><b>&#8211;</b><b>&#9633;</b><b id="wclose">&#10005;</b></div></div>
+    <div class="wbar"><span class="nav">&#8592;&#8594;&#8593;</span><div class="addr">This PC &#8250; Desktop &#8250; Books</div><div class="srch">Search Books</div></div>
+    <div class="wb">
+      <div class="side"><div>Home</div><div class="sel">Desktop</div><div>Downloads</div><div>Pictures</div><div>This PC</div></div>
+      <div class="list"><div class="row hd"><span>Name</span><span>Date modified</span><span>Type</span><span>Size</span></div><div class="row"><span class="nm"><i class="fi" style="background:#d93025">PDF</i>Data Structures.pdf</span><span>Oct 28, 2026</span><span>PDF File</span><span>2.4 MB</span></div><div class="row"><span class="nm"><i class="fi" style="background:#2b6cd4">DOC</i>Algorithms Notes.docx</span><span>Oct 30, 2026</span><span>Word Document</span><span>186 KB</span></div><div class="row"><span class="nm"><i class="fi" style="background:#d93025">PDF</i>Database Systems.pdf</span><span>Oct 21, 2026</span><span>PDF File</span><span>3.1 MB</span></div><div class="row"><span class="nm"><i class="fi" style="background:#d9622b">PPT</i>Digital Logic Slides.pptx</span><span>Oct 14, 2026</span><span>PowerPoint</span><span>5.7 MB</span></div><div class="row"><span class="nm"><i class="fi" style="background:#1e8e4e">XLS</i>Class Routine.xlsx</span><span>Sep 29, 2026</span><span>Excel Sheet</span><span>42 KB</span></div><div class="row"><span class="nm"><i class="fi" style="background:#d93025">PDF</i>Operating Systems.pdf</span><span>Sep 12, 2026</span><span>PDF File</span><span>4.8 MB</span></div></div>
+    </div>
+    <div class="wf">6 items</div>
+  </div>
+
   <div class="dock">
     <div class="bubble" id="bubble"></div>
     <div class="orb" id="orb" title="Watson">
@@ -99,7 +136,7 @@ html,body{height:100%;font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans 
       <span><svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="11" r="2.5"/></svg></span>
       <span><svg viewBox="0 0 24 24"><rect width="22" height="16" x="1" y="4" rx="3" fill="#2d8cff"/><text x="12" y="15.500" font-size="8" font-weight="700" fill="#fff" text-anchor="middle" font-family="sans-serif">ZM</text></svg></span>
       <span><svg viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="1.8"><circle cx="12" cy="12" r="9.500"/><ellipse cx="12" cy="12" rx="4" ry="9.500"/><path d="M2.500 12h19M4 7.500h16M4 16.500h16"/></svg></span>
-            <span class="run"><button class="app" id="appbtn" aria-label="Watson"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#ED1C24"/><circle cx="50" cy="50" r="20" fill="#fff"/></svg></button></span>
+            <span class="ex" id="tbEx"><svg viewBox="0 0 24 24"><path fill="#f6c343" d="M2 6a2 2 0 012-2h5l2 2h9a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z"/></svg></span><span class="run"><button class="app" id="appbtn" aria-label="Watson"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#ED1C24"/><circle cx="50" cy="50" r="20" fill="#fff"/></svg></button></span>
     </div>
     <div class="tray">
       <svg viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><path d="M2 9a15 15 0 0120 0M5 12.500a10 10 0 0114 0M8.500 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="#222"/></svg>
@@ -155,7 +192,13 @@ async function wake(){
   return id;
 }
 
+const win=document.getElementById('win'), tbEx=document.getElementById('tbEx');
+function openExplorer(){tbEx.classList.add('on');win.setAttribute('aria-hidden','false');void win.offsetWidth;win.classList.add('open');}
+function closeExplorer(){win.classList.remove('open');win.setAttribute('aria-hidden','true');setTimeout(()=>{if(!win.classList.contains('open'))tbEx.classList.remove('on')},320);}
+document.getElementById('wclose').onclick=closeExplorer;
+
 async function runCommand(heard,result,ok){
+  closeExplorer();
   const id=await wake(); if(id!==runId){return}
   await wait(3200);
   // কমান্ড শোনার পর: সাদা ব্যাকগ্রাউন্ড, লাল বার
@@ -164,6 +207,7 @@ async function runCommand(heard,result,ok){
   await wait(2400);
   // ফলাফল
   say(result, ok?'':'fail');
+  if(ok) openExplorer();
   await wait(3200);
   busy=false;
   await toIdle();
@@ -181,9 +225,9 @@ function pick(v){scene=v;sF.setAttribute('aria-pressed',v==='found');sN.setAttri
 sF.onclick=()=>pick('found'); sN.onclick=()=>pick('not');
 // স্ক্রিনের যেকোনো জায়গায় ক্লিক করলে সিলেক্ট করা সিনারিও চলবে
 document.addEventListener('click',e=>{
-  if(e.target.closest('.scenes')||busy) return;
+  if(e.target.closest('.scenes')||e.target.closest('.win')||busy) return;
   if(scene==='found') runCommand('Open books folder','Book folder opened',true);
-  else runCommand('Open books folder','Folder not found',false);
+  else runCommand('Open documents folder','Folder not found',false);
 });
 
 function tick(){const d=new Date();document.getElementById('clock').textContent=d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});document.getElementById('date').textContent=d.toLocaleDateString('en-US');}
