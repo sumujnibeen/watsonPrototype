@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Watson – Voice Assistant (Prototype)</title>
+<title>Watson – voice assistant </title>
 <style>
 :root{
   --red:#ED1C24; --white:#fff; --ink:#111; --gray:#e0e0e0; --prompt:#8a8a8a;
@@ -64,7 +64,7 @@ html,body{height:100%;font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans 
 .tasks span.ex::after{content:"";position:absolute;bottom:3px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:#8a8a8a}
 @media (max-width:720px){.side{display:none}.row{grid-template-columns:1fr 60px}.row span:nth-child(2),.row span:nth-child(3){display:none}.srch{display:none}}
 /* assistant popup */
-.dock{z-index:4;position:absolute;right:20px;bottom:64px;display:flex;align-items:center;gap:12px;flex-direction:row}
+.dock{z-index:20;position:absolute;left:0;top:0;width:64px;height:64px}
 .orb{position:relative;width:64px;height:64px;border-radius:50%;overflow:hidden;background:var(--gray);flex:none;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer}
 .orb .sweep{position:absolute;inset:0;transform:translateX(-101%)}
 .orb svg{position:absolute;inset:0;width:100%;height:100%}
@@ -84,6 +84,38 @@ html,body{height:100%;font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans 
 .bubble.show.prompt{opacity:.7}
 .bubble.fail{background:var(--red);color:#fff}
 
+
+.orb{touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .2s}
+.orb.drag{transform:scale(1.1);cursor:grabbing}
+.bubble{position:absolute;top:50%;right:calc(100% + 12px);width:max-content;max-width:min(340px,66vw);transform:translate(16px,-50%) scale(.97)}
+.bubble.show{transform:translate(0,-50%)}
+.dock.flip .bubble{right:auto;left:calc(100% + 12px);transform:translate(-16px,-50%) scale(.97)}
+.dock.flip .bubble.show{transform:translate(0,-50%)}
+.set{position:absolute;z-index:30;top:110px;left:50%;width:min(380px,92vw);margin-left:calc(min(380px,92vw)/-2);background:#fbfbfb;border-radius:10px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.12);color:#1b1b1b;font-size:14px;opacity:0;transform:translateY(24px) scale(.94);pointer-events:none;transition:opacity .25s var(--ease),transform .3s var(--ease)}
+.set.open{opacity:1;transform:none;pointer-events:auto}
+.wc b#setClose:hover{background:#c42b1c;color:#fff}
+.sbody{padding:4px 16px 16px}
+.opt{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #eee}
+.opt small{display:block;color:#777;font-size:11.5px;margin-top:2px}
+.opt.col{display:block;border:0}
+.opt input{width:100%;margin-top:8px;padding:9px 10px;border:1px solid #ccc;border-radius:7px;font:inherit}
+.opt input:focus{outline:2px solid #1f6fff;border-color:#1f6fff}
+.cb{flex:none;width:24px;height:24px;border-radius:6px;border:2px solid #ED1C24;background:#fff;position:relative;cursor:pointer;padding:0;transition:background .2s}
+.cb.on{background:#ED1C24}
+.cb.on::after{content:"";position:absolute;left:6px;top:1px;width:6px;height:12px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+.cb:focus-visible{outline:3px solid #1f6fff;outline-offset:2px}
+.menu{position:absolute;z-index:25;width:300px;height:300px;pointer-events:none;overflow:visible}
+.menu g.arc{transform-box:view-box;transform-origin:50% 50%;opacity:0;transform:scale(.7);transition:opacity .22s var(--ease),transform .28s var(--ease);cursor:pointer;outline:0}
+.menu.open g.arc{opacity:1;transform:none}
+.menu.open #mCancel{transition-delay:.07s}
+.menu .band{fill:none;stroke:#ED1C24;stroke-width:34;stroke-linecap:round;pointer-events:stroke;transition:stroke .15s;filter:drop-shadow(0 4px 8px rgba(237,28,36,.35))}
+.menu g.arc:hover .band,.menu g.arc:focus-visible .band{stroke:#c9121a}
+.menu text{fill:#fff;font-size:14px;font-family:inherit;pointer-events:none;user-select:none}
+.sbtns{display:flex;justify-content:flex-end;gap:10px;padding:12px 16px;border-top:1px solid #eee;background:#f5f5f5}
+.sbtns button{border:0;border-radius:8px;padding:9px 20px;font:inherit;font-size:14px;cursor:pointer}
+.sbtns .b1{background:#ED1C24;color:#fff}.sbtns .b1:hover{background:#d3161d}
+.sbtns .b2{background:#e4e4e4;color:#111}.sbtns .b2:hover{background:#d6d6d6}
+.sbtns button:focus-visible{outline:3px solid #1f6fff;outline-offset:2px}
 /* taskbar */
 .taskbar{position:absolute;left:0;right:0;bottom:0;height:48px;background:rgba(243,243,243,.85);backdrop-filter:blur(20px);border-top:1px solid rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center}
 .tasks{display:flex;gap:6px;align-items:center}
@@ -96,7 +128,7 @@ html,body{height:100%;font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans 
 .tasks span.run::after{content:"";position:absolute;bottom:2px;left:50%;width:16px;height:3px;margin-left:-8px;border-radius:3px;background:#ED1C24}
 .app{cursor:pointer;border:0;background:none}
 .app:focus-visible{outline:3px solid #1f6fff;border-radius:8px}
-@media (max-width:720px){.panel{top:auto;bottom:66px;left:12px;right:auto;width:200px}.dock{right:10px;bottom:240px}.taskbar{justify-content:flex-start;padding-left:10px}.tasks span{width:34px}.tray svg{display:none}}
+@media (max-width:720px){.panel{top:auto;bottom:66px;left:12px;right:auto;width:200px}.taskbar{justify-content:flex-start;padding-left:10px}.tasks span{width:34px}.tray svg{display:none}}
 @media (prefers-reduced-motion:reduce){.orb.active svg rect{animation:none}}
 </style>
 </head>
@@ -121,12 +153,29 @@ html,body{height:100%;font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans 
     <div class="wf">6 items</div>
   </div>
 
-  <div class="dock">
+  <div class="dock" id="dock">
     <div class="bubble" id="bubble"></div>
     <div class="orb" id="orb" title="Watson">
       <div class="sweep" id="sweep"></div>
       <svg viewBox="0 0 100 100"><rect x="22" y="31" width="11.5" height="38" rx="3"/><rect x="43.2" y="21" width="13.6" height="58" rx="3.5"/><rect x="66.5" y="31" width="11.5" height="38" rx="3"/></svg>
     </div>
+  </div>
+
+  <svg class="menu" id="menu" viewBox="0 0 300 300" aria-label="Assistant menu">
+    <g id="mrot">
+      <g class="arc" id="mSet" role="button" tabindex="0" aria-label="Settings"><path class="band" id="pS"/><text dy=".35em"><textPath href="#pS" startOffset="50%" text-anchor="middle">Settings</textPath></text></g>
+      <g class="arc" id="mCancel" role="button" tabindex="0" aria-label="Cancel task"><path class="band" id="pC"/><text dy=".35em"><textPath href="#pC" startOffset="50%" text-anchor="middle">Cancel task</textPath></text></g>
+    </g>
+  </svg>
+
+  <div class="set" id="set" aria-hidden="true">
+    <div class="wt"><div class="wtab">Watson Settings</div><div class="wc"><b id="setClose">&#10005;</b></div></div>
+    <div class="sbody">
+      <div class="opt"><div>Always on top</div><button class="cb on" id="tgTop" role="checkbox" aria-checked="true" aria-label="Always on top"></button></div>
+      <div class="opt"><div>Command box</div><button class="cb on" id="tgCmd" role="checkbox" aria-checked="true" aria-label="Command box"></button></div>
+      <div class="opt col"><div>API key (Grok)</div><input type="password" id="api" placeholder="Paste your key" autocomplete="off" spellcheck="false"></div>
+    </div>
+    <div class="sbtns"><button class="b2" id="setCancel">Cancel</button><button class="b1" id="setApply">Apply</button></div>
   </div>
 
   <div class="taskbar">
@@ -147,90 +196,129 @@ html,body{height:100%;font-family:"Segoe UI",system-ui,-apple-system,"Noto Sans 
 </div>
 
 <script>
-const orb=document.getElementById('orb'), sweep=document.getElementById('sweep'), bubble=document.getElementById('bubble');
+const $=id=>document.getElementById(id);
+const orb=$('orb'),sweep=$('sweep'),bubble=$('bubble'),dock=$('dock'),menu=$('menu'),setWin=$('set'),win=$('win'),tbEx=$('tbEx');
 const bars=[...orb.querySelectorAll('rect')];
-const RED='#ED1C24', WHITE='#ffffff', GRAY='#e0e0e0', BLACK='#000000';
-let bg=GRAY, hideT=null, runId=0, busy=false;
-
+const RED='#ED1C24',WHITE='#ffffff',GRAY='#e0e0e0',BLACK='#000000';
+let hideT,listenT,runId=0,swId=0,busy=false,listening=false,scene='found';
+const cfg={top:true,cmd:true,api:''};
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
-orb.style.background=bg;
+orb.style.background=GRAY;
 
-/* সাইড থেকে রঙ এসে পুরো বৃত্ত ঢেকে দেয় (Nothing recorder-এর মতো) */
-function sweepTo(newBg,barColor,fromLeft=true){
+/* সাইড থেকে রঙ এসে পুরো বৃত্ত ঢেকে দেয় */
+function sweepTo(bgc,bar,left=true){
   return new Promise(res=>{
-    sweep.style.transition='none';
-    sweep.style.background=newBg;
-    sweep.style.transform=`translateX(${fromLeft?-101:101}%)`;
-    void sweep.offsetWidth;
-    bars.forEach(b=>b.style.fill=barColor);
-    sweep.style.transition='transform .6s var(--ease)';
-    sweep.style.transform='translateX(0)';
-    setTimeout(()=>{orb.style.background=newBg;bg=newBg;sweep.style.transition='none';sweep.style.transform='translateX(-101%)';res();},620);
+    const my=++swId;
+    sweep.style.transition='none';sweep.style.background=bgc;
+    sweep.style.transform=`translateX(${left?-101:101}%)`;void sweep.offsetWidth;
+    bars.forEach(x=>x.style.fill=bar);
+    sweep.style.transition='transform .6s var(--ease)';sweep.style.transform='translateX(0)';
+    setTimeout(()=>{if(my===swId){orb.style.background=bgc;sweep.style.transition='none';sweep.style.transform='translateX(-101%)';}res();},620);
   });
 }
-
-function say(text,mode=''){ // mode: '' | 'prompt' | 'fail'
+function say(t,mode=''){
   clearTimeout(hideT);
-  bubble.className='bubble show '+mode;
-  bubble.textContent=text;
-  hideT=setTimeout(hide,10000); // সর্বোচ্চ ১০ সেকেন্ড
+  if(!cfg.cmd){hide();return;}
+  bubble.className='bubble show '+mode;bubble.textContent=t;
+  hideT=setTimeout(hide,10000);
 }
 function hide(){bubble.classList.remove('show')}
+async function toIdle(){clearTimeout(hideT);clearTimeout(listenT);hide();listening=false;orb.classList.remove('active');await sweepTo(GRAY,BLACK,false);}
 
-async function toIdle(){
-  clearTimeout(hideT); hide();
-  orb.classList.remove('active');
-  await sweepTo(GRAY,BLACK,false);
-}
-
-async function wake(){
-  if(busy) return; busy=true; const id=++runId;
-  hide(); await wait(120);
-  orb.classList.add('active');
-  say('Speak sherlock','prompt');
-  await sweepTo(RED,WHITE,true);
-  return id;
-}
-
-const win=document.getElementById('win'), tbEx=document.getElementById('tbEx');
 function openExplorer(){tbEx.classList.add('on');win.setAttribute('aria-hidden','false');void win.offsetWidth;win.classList.add('open');}
 function closeExplorer(){win.classList.remove('open');win.setAttribute('aria-hidden','true');setTimeout(()=>{if(!win.classList.contains('open'))tbEx.classList.remove('on')},320);}
-document.getElementById('wclose').onclick=closeExplorer;
+$('wclose').onclick=closeExplorer;
 
-async function runCommand(heard,result,ok){
-  closeExplorer();
-  const id=await wake(); if(id!==runId){return}
-  await wait(3200);
-  // কমান্ড শোনার পর: সাদা ব্যাকগ্রাউন্ড, লাল বার
+async function run(heard,result,ok){
+  closeExplorer();clearTimeout(listenT);
+  const my=++runId,live=()=>my===runId;busy=true;
+  if(!listening){
+    hide();await wait(120);if(!live())return;
+    orb.classList.add('active');say('Speak sherlock','prompt');
+    await sweepTo(RED,WHITE,true);if(!live())return;
+    listening=true;
+  }else say('Speak sherlock','prompt');
+  await wait(3200);if(!live())return;
   say('You said: '+heard);
-  await sweepTo(WHITE,RED,true);
-  await wait(2400);
-  // ফলাফল
-  say(result, ok?'':'fail');
-  if(ok) openExplorer();
-  await wait(3200);
-  busy=false;
-  await toIdle();
+  await sweepTo(WHITE,RED,true);if(!live())return;
+  await wait(2400);if(!live())return;
+  say(result,ok?'':'fail');if(ok)openExplorer();
+  await wait(3200);if(!live())return;
+  busy=false;await toIdle();
 }
 
-async function wakeOnly(){
-  const id=await wake(); if(id!==runId) return;
-  await wait(6000);
-  busy=false; hide(); await toIdle();
+/* Cancel task: যেখানে ছিল সেখানেই থামবে, আবার লিসেনিং মোডে ফিরবে */
+async function cancelTask(){
+  if(busy){
+    runId++;busy=false;clearTimeout(hideT);listening=true;
+    orb.classList.add('active');say('Speak sherlock','prompt');
+    await sweepTo(RED,WHITE,true);
+    clearTimeout(listenT);listenT=setTimeout(()=>{if(!busy&&listening)toIdle()},10000);
+  }else if(listening){await toIdle();}
 }
 
-let scene='found';
-const sF=document.getElementById('sFound'), sN=document.getElementById('sNot');
+/* মেনু ও সেটিংস */
+function arcD(r,below){const k=r*0.7071;return below?`M${150-k} ${150+k} A${r} ${r} 0 0 0 ${150+k} ${150+k}`:`M${150-k} ${150-k} A${r} ${r} 0 0 1 ${150+k} ${150-k}`;}
+function openMenu(){
+  const r=dock.getBoundingClientRect(),cx=r.left+32,cy=r.top+32,right=cx>innerWidth/2,above=r.top>130;
+  $('pS').setAttribute('d',arcD(64,!above));$('pC').setAttribute('d',arcD(106,!above));
+  $('mrot').setAttribute('transform',`rotate(${(right?-1:1)*(above?1:-1)*16} 150 150)`);
+  menu.style.left=(cx-150)+'px';menu.style.top=(cy-150)+'px';
+  menu.classList.add('open');
+}
+const closeMenu=()=>menu.classList.remove('open');
+const act=(el,fn)=>{el.onclick=fn;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fn();}};};
+act($('mCancel'),()=>{closeMenu();cancelTask();});
+act($('mSet'),()=>{closeMenu();openSet();});
+
+/* Settings: Apply চাপলে তবেই বদল কার্যকর, Cancel/✕ করলে বাতিল */
+let draft={...cfg};
+function syncUI(){[['tgTop','top'],['tgCmd','cmd']].forEach(([id,k])=>{const x=$(id);x.classList.toggle('on',draft[k]);x.setAttribute('aria-checked',draft[k]);});$('api').value=draft.api;}
+function openSet(){draft={...cfg};syncUI();setWin.classList.add('open');setWin.setAttribute('aria-hidden','false');}
+function closeSet(){setWin.classList.remove('open');setWin.setAttribute('aria-hidden','true');}
+[['tgTop','top'],['tgCmd','cmd']].forEach(([id,k])=>{$(id).onclick=()=>{draft[k]=!draft[k];syncUI();};});
+$('api').oninput=e=>{draft.api=e.target.value;};
+$('setClose').onclick=closeSet;$('setCancel').onclick=closeSet;
+$('setApply').onclick=()=>{Object.assign(cfg,draft);dock.style.zIndex=cfg.top?20:2;if(!cfg.cmd)hide();closeSet();};
+
+/* আইকন: ক্লিক-এন্ড-হোল্ড করে যেকোনো জায়গায় রাখা; ডাবল ট্যাপে মেনু */
+function place(x,y){
+  x=Math.max(0,Math.min(innerWidth-64,x));y=Math.max(0,Math.min(innerHeight-64,y));
+  dock.style.left=x+'px';dock.style.top=y+'px';
+  dock.classList.toggle('flip',x+32<innerWidth/2); // বামে থাকলে বক্স ডানে
+}
+place(innerWidth-84,innerHeight-128);
+addEventListener('resize',()=>place(parseFloat(dock.style.left),parseFloat(dock.style.top)));
+let hold=null,drag=false,ox=0,oy=0,sx=0,sy=0,lastTap=0;
+orb.addEventListener('pointerdown',e=>{
+  sx=e.clientX;sy=e.clientY;const r=dock.getBoundingClientRect();ox=e.clientX-r.left;oy=e.clientY-r.top;
+  hold=setTimeout(()=>{drag=true;closeMenu();orb.classList.add('drag');try{orb.setPointerCapture(e.pointerId)}catch(_){}if(navigator.vibrate)navigator.vibrate(15);},280);
+});
+orb.addEventListener('pointermove',e=>{
+  if(drag)place(e.clientX-ox,e.clientY-oy);
+  else if(hold&&Math.hypot(e.clientX-sx,e.clientY-sy)>8){clearTimeout(hold);hold=null;}
+});
+function endDrag(){clearTimeout(hold);hold=null;if(drag){drag=false;orb.classList.remove('drag');return true;}return false;}
+orb.addEventListener('pointercancel',endDrag);
+orb.addEventListener('pointerup',()=>{
+  if(endDrag())return;
+  const n=Date.now();
+  if(n-lastTap<350){lastTap=0;openMenu();}else lastTap=n;
+});
+orb.addEventListener('contextmenu',e=>e.preventDefault());
+
+/* সিনারিও */
+const sF=$('sFound'),sN=$('sNot');
 function pick(v){scene=v;sF.setAttribute('aria-pressed',v==='found');sN.setAttribute('aria-pressed',v==='not');}
-sF.onclick=()=>pick('found'); sN.onclick=()=>pick('not');
-// স্ক্রিনের যেকোনো জায়গায় ক্লিক করলে সিলেক্ট করা সিনারিও চলবে
+sF.onclick=()=>pick('found');sN.onclick=()=>pick('not');
 document.addEventListener('click',e=>{
-  if(e.target.closest('.scenes')||e.target.closest('.win')||busy) return;
-  if(scene==='found') runCommand('Open books folder','Book folder opened',true);
-  else runCommand('Open documents folder','Folder not found',false);
+  if(menu.classList.contains('open')&&!e.target.closest('.menu,.dock')){closeMenu();return;}
+  if(e.target.closest('.scenes,.win,.set,.menu,.dock')||busy)return;
+  if(scene==='found')run('Open books folder','Book folder opened',true);
+  else run('Open documents folder','Folder not found',false);
 });
 
-function tick(){const d=new Date();document.getElementById('clock').textContent=d.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});document.getElementById('date').textContent=d.toLocaleDateString('en-US');}
+function tick(){const d=new Date();$('clock').textContent=d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});$('date').textContent=d.toLocaleDateString('en-US');}
 tick();setInterval(tick,15000);
 </script>
 </body>
